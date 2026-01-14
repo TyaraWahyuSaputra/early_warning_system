@@ -4,6 +4,7 @@ import sys
 import os
 import traceback
 import time
+import base64  
 
 # ==================== CONFIG ====================
 st.set_page_config(
@@ -416,10 +417,140 @@ else:
 # ==================== SIDEBAR NAVIGATION ====================
 def setup_sidebar():
     with st.sidebar:
+        # ===== LOGO SECTION =====
+        # Multiple possible logo paths
+        LOGO_PATHS = [
+        os.path.join(current_dir, "assets", "logo", "ews_logo.png"),  # Path relatif utama
+        os.path.join("assets", "logo", "ews_logo.png"),
+        "assets/logo/ews_logo.png",
+        "ews_logo.png",
+        os.path.join(current_dir, "ews_logo.png"),
+    ]
+        
+        def find_and_encode_logo():
+            """Try multiple paths to find logo"""
+            for logo_path in LOGO_PATHS:
+                try:
+                    if os.path.exists(logo_path):
+                        safe_print(f"✅ Logo found: {logo_path}")
+                        with open(logo_path, "rb") as f:
+                            return base64.b64encode(f.read()).decode()
+                except Exception as e:
+                    safe_print(f"⚠️ Error loading {logo_path}: {e}")
+                    continue
+            safe_print("⚠️ Logo not found, using fallback")
+            return None
+        
+        logo_base64 = find_and_encode_logo()
+        
+        # Display logo or fallback
+        if logo_base64:
+            # With actual logo
+            st.markdown(f"""
+            <div style="
+                text-align: center;
+                padding: 25px 15px 20px 15px;
+                margin: -16px -16px 20px -16px;
+                background: rgba(0,174,230,0.05);
+                border-bottom: 1px solid rgba(0,174,230,0.1);
+            ">
+                <!-- Logo Container -->
+                <div style="
+                    display: inline-block;
+                    padding: 15px;
+                    background: rgba(0,174,230,0.1);
+                    border-radius: 20px;
+                    margin-bottom: 15px;
+                    border: 2px solid rgba(0,174,230,0.2);
+                    box-shadow: 0 4px 15px rgba(0,174,230,0.15);
+                ">
+                    <img src="data:image/png;base64,{logo_base64}" 
+                         style="
+                            width: 80px;
+                            height: 80px;
+                            object-fit: contain;
+                         "
+                         alt="Logo Sistem Peringatan Dini Banjir">
+                </div>
+                
+                <!-- System Name -->
+                <h3 style="
+                    color: #00aee6;
+                    margin: 10px 0 5px 0;
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    letter-spacing: 0.5px;
+                ">
+                    SISTEM BANJIR
+                </h3>
+                
+                <!-- Subtitle -->
+                <p style="
+                    color: #9aa6ad;
+                    font-size: 0.9rem;
+                    margin: 0;
+                    opacity: 0.9;
+                    font-weight: 500;
+                ">
+                    Peringatan Dini Banjir
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            # Fallback without logo
+            st.markdown("""
+            <div style="
+                text-align: center;
+                padding: 25px 15px 20px 15px;
+                margin: -16px -16px 20px -16px;
+                background: rgba(0,174,230,0.05);
+                border-bottom: 1px solid rgba(0,174,230,0.1);
+            ">
+                <!-- Fallback Logo -->
+                <div style="
+                    width: 80px;
+                    height: 80px;
+                    margin: 0 auto 15px auto;
+                    background: linear-gradient(135deg, #00aee6, #0088cc);
+                    border-radius: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 2px solid rgba(0,174,230,0.3);
+                    box-shadow: 0 4px 15px rgba(0,174,230,0.2);
+                ">
+                    <span style="font-size: 2.2rem; color: white; font-weight: bold;">B</span>
+                </div>
+                
+                <!-- System Name -->
+                <h3 style="
+                    color: #00aee6;
+                    margin: 10px 0 5px 0;
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    letter-spacing: 0.5px;
+                ">
+                    SISTEM BANJIR
+                </h3>
+                
+                <!-- Subtitle -->
+                <p style="
+                    color: #9aa6ad;
+                    font-size: 0.9rem;
+                    margin: 0;
+                    opacity: 0.9;
+                    font-weight: 500;
+                ">
+                    Peringatan Dini Banjir
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # ===== NAVIGATION MENU =====
         if 'current_page' not in st.session_state:
             st.session_state.current_page = "Home"
         
-        # Menu utama dengan tambahan "Panduan"
+        # Menu items tanpa icon
         menu_items = [
             ("Home", "Home"),
             ("Panduan", "Panduan"),
@@ -428,8 +559,8 @@ def setup_sidebar():
             ("Prediksi Real-time", "Prediksi Banjir"),
             ("Simulasi Banjir", "Simulasi Banjir")
         ]
-
-        st.markdown('<div style="margin: 10px 0;">', unsafe_allow_html=True)
+        
+        st.markdown('<div style="margin: 5px 0 25px 0;">', unsafe_allow_html=True)
         
         for text, page in menu_items:
             is_active = st.session_state.current_page == page
@@ -441,6 +572,8 @@ def setup_sidebar():
         
         st.markdown('</div>', unsafe_allow_html=True)
         
+        # ===== CONTACT INFO =====
+        st.markdown("---")
         st.markdown("### Kontak Kami:")
         
         with st.container():
